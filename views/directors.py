@@ -9,14 +9,19 @@ director_ns = Namespace('directors')
 
 @director_ns.route('/')
 class DirectorsView(Resource):
-    @auth_required
+    #@auth_required
     def get(self):
-        directors = director_service.get_all()
+        page = request.args.get('page')
+
+        filters = {
+            'page': page
+        }
+        directors = director_service.get_all(filters)
         result = DirectorSchema(many=True).dump(directors)
 
         return result, 200
 
-    @admin_required
+    #@admin_required
     def post(self):
         req_json = request.json()
         director = director_service.create(req_json)
@@ -25,14 +30,14 @@ class DirectorsView(Resource):
 
 @director_ns.route('/<int:uid>')
 class DirectorView(Resource):
-    @auth_required
+    #@auth_required
     def get(self, uid):
         director = director_service.get_one(uid)
         result = DirectorSchema().dump(director)
 
         return result, 200
 
-    @admin_required
+    #@admin_required
     def put(self, uid):
         req_json = request.json
         if "id" not in req_json:
@@ -41,7 +46,7 @@ class DirectorView(Resource):
 
         return "", 204
 
-    @admin_required
+    #@admin_required
     def delete(self, uid):
         director_service.delete(uid)
 

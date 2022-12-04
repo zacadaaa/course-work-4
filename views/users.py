@@ -19,6 +19,26 @@ class UsersView(Resource):
         user = user_service.create(req_json)
         return "", 201, {"location": f"users/{user.id}"}
 
+@user_ns.route('/password')
+class UpdateUserPasswordViews(Resource):
+    def put(self):
+        req_json = request.json
+
+        email = req_json.get('email')
+        old_password = req_json.get('password_1')
+        new_password = req_json.get('password_2')
+
+        user = user_service.get_by_email(email)
+
+        if user_service.compare_password(user.password, old_password):
+            user.password = user_service.make_password_hash(new_password)
+            result = UserSchema().dump(user)
+            user_service.update(result)
+        else:
+            print("Password did not changed")
+
+        return "", 201
+
 
 @user_ns.route('/<int:uid>')
 class UserView(Resource):
@@ -28,7 +48,7 @@ class UserView(Resource):
 
         return result, 200
 
-    def put(self, uid):
+    def patch(self, uid):
         req_json = request.json
         if "id" not in req_json:
             req_json["id"] = uid
